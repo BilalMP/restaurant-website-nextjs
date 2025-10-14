@@ -1,5 +1,6 @@
 import Hero from "@/components/Hero";
 import SignatureDish from "@/components/SignatureDish";
+import Testimonials from "@/components/Testimonials";
 import React from "react";
 
 const Home = () => {
@@ -7,6 +8,7 @@ const Home = () => {
         <>
             <Hero />
             <SignatureDish />
+            <Testimonials />
         </>
     );
 };
