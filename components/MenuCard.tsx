@@ -2,6 +2,7 @@ import React from "react";
 import { Card, CardHeader, CardTitle } from "./ui/card";
 import Image from "next/image";
 import { Button } from "./ui/button";
+import { ShoppingCartIcon } from "lucide-react";
 
 interface MenuCardProp {
     imageUrl: string;
@@ -9,6 +10,9 @@ interface MenuCardProp {
     price: number;
     description: string;
     category?: string;
+    onAddCart: (customisation: string, quantity: number) => void;
+    vegetarian?: boolean;
+    available?: boolean;
 }
 const MenuCard = ({
     imageUrl,
@@ -16,6 +20,9 @@ const MenuCard = ({
     price,
     description,
     category,
+    onAddCart,
+    vegetarian,
+    available,
 }: MenuCardProp) => {
     return (
         <Card className="pt-0 hover:scale-105 transition-all duration-300"> 
@@ -35,11 +42,24 @@ const MenuCard = ({
                     {description}
                 </p>
                 {category && (
-                    <p className="text-sm text-primary/50">{category}</p>
+                    <p className="text-sm text-primary/50 mt-5">{category}</p>
                 )}
-                {category && (
-                    <Button className="text-sm text-primary/50">
+                {category && available && (
+                    <Button
+                        className="text-sm text-secondary mt-5 space-x-5 w-full"
+                        onClick={() => onAddCart(title, 1)}
+                    >
+                        <ShoppingCartIcon />
                         Add to cart
+                    </Button>
+                )}
+                {category && !available && (
+                    <Button
+                        className="text-sm text-secondary mt-5 space-x-5 w-full"
+                        disabled
+                    >
+                        <ShoppingCartIcon />
+                        Out of stock
                     </Button>
                 )}
             </div>
