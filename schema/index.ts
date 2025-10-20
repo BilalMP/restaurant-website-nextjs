@@ -32,3 +32,24 @@ export const reserveTableFormSchema = z.object({
         .min(1, { message: "Please enter your special requests" })
         .max(300, { message: "Special requests should be at most 300 characters" }),
 })
+
+export const registerSchema = z.object({
+    fullName: z.string({ message: "Please enter your full name" })
+        .min(1, { message: "Please enter your full name" })
+        .max(20, { message: "Full name should be at most 20 characters" }),
+
+    email: z.string({ message: "Please enter your email" })
+        .email({ message: "Invalid email address" }),
+
+    password: z.string({ message: "Password is required" })
+        .min(8, { message: "Password must be at least 8 characters" })
+        .max(20, { message: "Password must be at most 20 characters" }),
+
+    confirmPassword: z.string({ message: "Password is required" })
+        .min(8, { message: "Password must be at least 8 characters" })
+        .max(20, { message: "Password must be at most 20 characters" }),
+
+}).refine((data) => data.password === data.confirmPassword, {
+    message: "Password dont match",
+    path: ["confirmPassword"]
+})

@@ -65,9 +65,9 @@ const Header = () => {
                         <button className="hover:text-primary/50 transition-colors">
                             <ShoppingCart className="w-5 h-5" />
                         </button>
-                        <button className="hover:text-primary/50 transition-colors">
+                        <Link href="/login" className="hover:text-primary/50 transition-colors">
                             <UserRound className="w-5 h-5" />
-                        </button>
+                        </Link>
                     </div>
                     <Button className="capitalize">book a table</Button>
                 </nav>
