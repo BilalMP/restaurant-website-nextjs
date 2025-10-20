@@ -25,25 +25,23 @@ import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { toast } from "sonner";
 import { useRouter, useSearchParams } from "next/navigation";
-import { registerSchema } from "@/schema";
+import { loginSchema } from "@/schema";
 
-const RegisterForm = () => {
+const LoginForm = () => {
     const router = useRouter();
     const searchParams = useSearchParams();
     const redirect = searchParams.get("redirect") || "/";
     const [isPending, setIsPending] = useState<boolean>(false);
 
-    const form = useForm<z.infer<typeof registerSchema>>({
-        resolver: zodResolver(registerSchema),
+    const form = useForm<z.infer<typeof loginSchema>>({
+        resolver: zodResolver(loginSchema),
         defaultValues: {
-            fullName: "",
             email: "",
             password: "",
-            confirmPassword: "",
         },
     });
 
-    const onSubmit = async (values: z.infer<typeof registerSchema>) => {
+    const onSubmit = async (values: z.infer<typeof loginSchema>) => {
         alert("Hello World");
     };
 
@@ -52,10 +50,10 @@ const RegisterForm = () => {
             <Card className="w-[400px] ">
                 <CardHeader>
                     <CardTitle className="text-lg font-bold md:text-xl lg:text-2xl text-center">
-                        Create Account
+                        Welcome Back
                     </CardTitle>
                     <CardDescription className="text-center">
-                        Join Savoria and start ordering
+                        Sign in to your Savoria account
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -64,23 +62,6 @@ const RegisterForm = () => {
                             onSubmit={form.handleSubmit(onSubmit)}
                             className="space-y-8"
                         >
-                            <FormField
-                                control={form.control}
-                                name="fullName"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Name</FormLabel>
-                                        <FormControl>
-                                            <Input
-                                                placeholder="John Doe"
-                                                {...field}
-                                                type="text"
-                                            />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
                             <FormField
                                 control={form.control}
                                 name="email"
@@ -115,42 +96,25 @@ const RegisterForm = () => {
                                     </FormItem>
                                 )}
                             />
-                            <FormField
-                                control={form.control}
-                                name="confirmPassword"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Confirm Password</FormLabel>
-                                        <FormControl>
-                                            <Input
-                                                placeholder="*****"
-                                                {...field}
-                                                type="password"
-                                            />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
                             <Button
                                 disabled={isPending}
                                 className="w-full"
                                 size="lg"
                                 type="submit"
                             >
-                                Sign Up
+                                Sign In
                             </Button>
                         </form>
                     </Form>
                 </CardContent>
                 <CardFooter className="flex justify-center items-center">
                     <p className="text-center text-sm text-muted-foreground">
-                        Already have an account?{" "}
+                        Don't have an account?{" "}
                         <Link
-                            href={`/login`}
+                            href={`/signup`}
                             className="underline underline-offset-4 hover:text-primary"
                         >
-                            Sign In
+                            Sign Up
                         </Link>
                     </p>
                 </CardFooter>
@@ -159,4 +123,4 @@ const RegisterForm = () => {
     );
 };
 
-export default RegisterForm;
+export default LoginForm;
