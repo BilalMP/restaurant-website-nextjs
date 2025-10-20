@@ -2,7 +2,7 @@
 
 import { Card } from "@/components/ui/card";
 import { CalendarIcon, Clock4, Users } from "lucide-react";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -27,9 +27,14 @@ import {
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { Textarea } from "@/components/ui/textarea";
+import { authClient } from "@/lib/auth-client";
 
 const Reservation = () => {
     const [pending, setPending] = useState<boolean>(false);
+
+    const { data, isPending } = authClient.useSession();
+    const session = data;
+    const isLoggedIn = !isPending && !!session?.user;
 
     const form = useForm<z.infer<typeof reserveTableFormSchema>>({
         resolver: zodResolver(reserveTableFormSchema),
@@ -43,6 +48,13 @@ const Reservation = () => {
             specialRequests: "",
         },
     });
+
+    useEffect(() => {
+        if (session?.user) {
+            form.setValue("email", session.user.email || "");
+            form.setValue("fullName", session.user.name || "");
+        }
+    },[session,form])
 
     const onSubmit = async (
         values: z.infer<typeof reserveTableFormSchema>
@@ -113,6 +125,7 @@ const Reservation = () => {
                                                     placeholder="John Doe"
                                                     {...field}
                                                     type="text"
+                                                    disabled={isLoggedIn}
                                                 />
                                             </FormControl>
                                             <FormMessage />
@@ -130,6 +143,7 @@ const Reservation = () => {
                                                     placeholder="john@example.com"
                                                     {...field}
                                                     type="email"
+                                                    disabled={isLoggedIn}
                                                 />
                                             </FormControl>
                                             <FormMessage />
