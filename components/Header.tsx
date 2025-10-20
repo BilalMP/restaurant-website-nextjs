@@ -5,6 +5,15 @@ import Image from "next/image";
 import Link from "next/link";
 import React, { useState } from "react";
 import { Button } from "./ui/button";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { authClient } from "@/lib/auth-client";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 const MenuList = [
     {
@@ -26,6 +35,8 @@ const MenuList = [
 
 const Header = () => {
     const [isOpen, setIsOpen] = useState<boolean>(false);
+    const { data, isPending } = authClient.useSession();
+    const session = data;
     const handleMenuClick = () => {
         setIsOpen(!isOpen);
     };
@@ -65,9 +76,7 @@ const Header = () => {
                         <button className="hover:text-primary/50 transition-colors">
                             <ShoppingCart className="w-5 h-5" />
                         </button>
-                        <Link href="/login" className="hover:text-primary/50 transition-colors">
-                            <UserRound className="w-5 h-5" />
-                        </Link>
+                        {!session ? <NotSignUser /> : <SignedUser />}
                     </div>
                     <Button className="capitalize">book a table</Button>
                 </nav>
@@ -123,3 +132,47 @@ const Header = () => {
 };
 
 export default Header;
+
+const NotSignUser = () => {
+    return (
+        <Link
+            href="/login"
+            className="hover:text-primary/50 transition-colors"
+        >
+            <UserRound className="w-5 h-5" />
+        </Link>
+    );
+};
+
+const SignedUser = () => {
+    const router = useRouter();
+    const handleSignOut = async () => {
+        try {
+            await authClient.signOut({
+                fetchOptions: {
+                    onSuccess: () => {
+                        router.push("/login");
+                        router.refresh();
+                    },
+                },
+            });
+        } catch (error) {
+            toast("Failed to sign out");
+        }
+    };
+    return (
+        <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+                <UserRound className="w-5 h-5" />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+                className="w-56"
+                align="start"
+            >
+                <DropdownMenuItem onClick={handleSignOut}>
+                    Sign Out
+                </DropdownMenuItem>
+            </DropdownMenuContent>
+        </DropdownMenu>
+    );
+};

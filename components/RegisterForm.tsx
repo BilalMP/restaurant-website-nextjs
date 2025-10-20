@@ -10,7 +10,7 @@ import {
     CardTitle,
 } from "./ui/card";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
+import { set, z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
     Form,
@@ -26,6 +26,7 @@ import { Button } from "./ui/button";
 import { toast } from "sonner";
 import { useRouter, useSearchParams } from "next/navigation";
 import { registerSchema } from "@/schema";
+import { authClient } from "@/lib/auth-client";
 
 const RegisterForm = () => {
     const router = useRouter();
@@ -44,7 +45,26 @@ const RegisterForm = () => {
     });
 
     const onSubmit = async (values: z.infer<typeof registerSchema>) => {
-        alert("Hello World");
+        await authClient.signUp.email(
+            {
+                email: values.email,
+                password: values.password,
+                name: values.fullName,
+            },
+            {
+                onRequest: () => {
+                    setIsPending(true);
+                },
+                onSuccess: () => {
+                    toast.success("Account created successfully");
+                    router.push("/");
+                },
+                onError: (ctx: any) => {
+                    toast.error(ctx);
+                    setIsPending(false);
+                },
+            }
+        );
     };
 
     return (

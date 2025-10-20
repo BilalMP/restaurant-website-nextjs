@@ -26,6 +26,7 @@ import { Button } from "./ui/button";
 import { toast } from "sonner";
 import { useRouter, useSearchParams } from "next/navigation";
 import { loginSchema } from "@/schema";
+import { authClient } from "@/lib/auth-client";
 
 const LoginForm = () => {
     const router = useRouter();
@@ -42,7 +43,26 @@ const LoginForm = () => {
     });
 
     const onSubmit = async (values: z.infer<typeof loginSchema>) => {
-        alert("Hello World");
+        await authClient.signIn.email(
+            {
+                email: values.email,
+                password: values.password,
+            },
+            {
+                onRequest: () => {
+                    setIsPending(true);
+                },
+                onSuccess: () => {
+                    form.reset();
+                    toast.success("Logged in successfully");
+                    router.push("/");
+                },
+                onError:(ctx:any)=> {
+                    toast.error(ctx);
+                    setIsPending(false);
+                }
+            }
+        );
     };
 
     return (
