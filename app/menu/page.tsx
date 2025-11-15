@@ -6,15 +6,11 @@ import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
 import React, { useState } from "react";
 import { toast } from "sonner";
+import { useCartStore, type CartStoreState } from "@/store/cart-store";
 
 const Menu = () => {
     const [selectedCategory, setSelectedCategory] = useState<string>("All");
     const [searchQuery, setSearchQuery] = useState<string>("");
-    const [customiseDialogOpen, setCustomiseDialogOpen] =
-        useState<boolean>(false);
-    const [selectedItem, setSelectedItem] = useState<
-        (typeof menuItems)[0] | null
-    >(null);
 
     const filteredItems = menuItems.filter((item) => {
         const categoryMatch =
@@ -25,20 +21,58 @@ const Menu = () => {
         return categoryMatch && searchMatch;
     });
 
-    const handleCustomiseClick = (item: (typeof menuItems)[0]) => {
-        setSelectedItem(item);
-        setCustomiseDialogOpen(true);
-    };
+    const setCartCount = useCartStore((s: CartStoreState) => s.setCartCount);
 
-    const handleAddCart = (customisation: string, quantity: number) => {
-        if (selectedItem) {
+    const handleAddCart = (itemId: number, quantity: number) => {
+        // Find the menu item by id
+        const menuItem = menuItems.find((item) => item.id === itemId);
+        if (!menuItem) {
+            toast.error("Menu not found");
+            return;
+        }
+
+        //saving menu to local storage
+        try {
             const cartItem = {
-                ...selectedItem,
-                customisation,
+                id: menuItem.id,
+                title: menuItem.title,
+                price: menuItem.price,
+                imageUrl: menuItem.imageUrl,
+                description: menuItem.description,
+                category: menuItem.category,
+                vegetarian: menuItem.vegetarian,
                 quantity,
             };
+
+            // Get existing cart items from localStorage
+            const existingCart = localStorage.getItem("cart");
+            let cartItems = existingCart ? JSON.parse(existingCart) : [];
+
+            // Check if item already exists in cart 
+            const existingItemIndex = cartItems.findIndex(
+                (item: any) => item.id === itemId 
+            );
+
+            if (existingItemIndex !== -1) {
+                cartItems[existingItemIndex].quantity += quantity;
+            } else {
+                cartItems.push(cartItem);
+            }
+
+            localStorage.setItem("cart", JSON.stringify(cartItems));
+
+            // Update the zustand cart count with the sum of quantities
+            const newCount = cartItems.reduce(
+                (sum: number, it: any) => sum + (Number(it?.quantity) || 0),
+                0
+            );
+            setCartCount(newCount);
+            toast.success("Item added to cart");
+        } catch (error) {
+            console.error("Error saving to localStorage:", error);
+            toast.error("Failed to add item to cart");
         }
-        toast.success("Item added to cart");
+
     };
     return (
         <div className="padding mb-20">

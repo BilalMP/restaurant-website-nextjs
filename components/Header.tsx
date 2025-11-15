@@ -3,7 +3,7 @@
 import { Menu, ShoppingCart, UserRound, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "./ui/button";
 import {
     DropdownMenu,
@@ -13,7 +13,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { authClient } from "@/lib/auth-client";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
+import { useCartStore, type CartStoreState } from "@/store/cart-store";
 
 const MenuList = [
     {
@@ -37,9 +38,26 @@ const Header = () => {
     const [isOpen, setIsOpen] = useState<boolean>(false);
     const { data, isPending } = authClient.useSession();
     const session = data;
+    const cartCount = useCartStore((s: CartStoreState) => s.cartCount);
+    const syncFromLocalStorage = useCartStore((s: CartStoreState) => s.syncFromLocalStorage);
     const handleMenuClick = () => {
         setIsOpen(!isOpen);
     };
+
+    const handleCartClick = () => {
+        redirect("/cart");
+    };
+
+    useEffect(() => {
+        syncFromLocalStorage();
+        const onStorage = (e: StorageEvent) => {
+            if (e.key === "cart") {
+                syncFromLocalStorage();
+            }
+        };
+        window.addEventListener("storage", onStorage);
+        return () => window.removeEventListener("storage", onStorage);
+    }, [syncFromLocalStorage]);
 
     return (
         <header className="padding bg-secondary text-primary">
@@ -73,8 +91,13 @@ const Header = () => {
                         ))}
                     </div>
                     <div className="flex items-center gap-5">
-                        <button className="hover:text-primary/50 transition-colors">
+                        <button className="relative hover:text-primary/50 transition-colors" onClick={handleCartClick}>
                             <ShoppingCart className="w-5 h-5" />
+                            {cartCount > 0 && (
+                                <span className="absolute -top-2 -right-2 inline-flex items-center justify-center rounded-full bg-primary text-secondary text-[10px] font-bold h-4 min-w-4 px-1">
+                                    {cartCount}
+                                </span>
+                            )}
                         </button>
                         {!session ? <NotSignUser /> : <SignedUser />}
                     </div>
@@ -113,8 +136,13 @@ const Header = () => {
                         ))}
                     </div>
                     <div className="flex items-center gap-6 px-3 py-4">
-                        <button className="hover:text-primary/50 transition-colors">
+                        <button className="relative hover:text-primary/50 transition-colors" onClick={handleCartClick}>
                             <ShoppingCart className="w-5 h-5" />
+                            {cartCount > 0 && (
+                                <span className="absolute -top-2 -right-2 inline-flex items-center justify-center rounded-full bg-primary text-secondary text-[10px] font-bold h-4 min-w-4 px-1">
+                                    {cartCount}
+                                </span>
+                            )}
                         </button>
                         <button className="hover:text-primary/50 transition-colors">
                             <UserRound className="w-5 h-5" />
@@ -169,6 +197,9 @@ const SignedUser = () => {
                 className="w-56"
                 align="start"
             >
+                <DropdownMenuItem>
+                    <Link href="/orders">My Orders</Link>
+                </DropdownMenuItem>
                 <DropdownMenuItem onClick={handleSignOut}>
                     Sign Out
                 </DropdownMenuItem>

@@ -55,7 +55,7 @@ const LoginForm = () => {
                 onSuccess: () => {
                     form.reset();
                     toast.success("Logged in successfully");
-                    router.push("/");
+                    router.push(redirect);
                 },
                 onError:(ctx:any)=> {
                     toast.error(ctx);
