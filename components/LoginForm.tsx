@@ -58,7 +58,21 @@ const LoginForm = () => {
                     router.push(redirect);
                 },
                 onError:(ctx:any)=> {
-                    toast.error(ctx);
+                    let errorMessage = "Invalid email or password. Please try again.";
+                    
+                    if (typeof ctx === 'string') {
+                        errorMessage = ctx;
+                    } else if (ctx?.error?.message) {
+                        errorMessage = ctx.error.message;
+                    } else if (ctx?.responseText) {
+                        errorMessage = ctx.responseText;
+                    } else if (ctx?.error) {
+                        errorMessage = typeof ctx.error === 'string' ? ctx.error : ctx.error.message || String(ctx.error);
+                    } else if (ctx?.message) {
+                        errorMessage = ctx.message;
+                    }
+                    
+                    toast.error(errorMessage);
                     setIsPending(false);
                 }
             }

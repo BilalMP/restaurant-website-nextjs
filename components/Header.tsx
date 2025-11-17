@@ -99,7 +99,13 @@ const Header = () => {
                                 </span>
                             )}
                         </button>
-                        {!session ? <NotSignUser /> : <SignedUser />}
+                        {!session ? (
+                            <NotSignUser />
+                        ) : (session.user?.role?.toUpperCase() === "ADMIN") ? (
+                            <Adminuser />
+                        ) : (
+                            <SignedUser />
+                        )}
                     </div>
                     <Button className="capitalize">book a table</Button>
                 </nav>
@@ -144,7 +150,7 @@ const Header = () => {
                                 </span>
                             )}
                         </button>
-                        <button className="hover:text-primary/50 transition-colors">
+                        <button>
                             <UserRound className="w-5 h-5" />
                         </button>
                     </div>
@@ -191,7 +197,9 @@ const SignedUser = () => {
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <UserRound className="w-5 h-5" />
+                <button>
+                    <UserRound className="w-5 h-5" />
+                </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent
                 className="w-56"
@@ -207,3 +215,50 @@ const SignedUser = () => {
         </DropdownMenu>
     );
 };
+
+const Adminuser = () => {
+    const router = useRouter();
+    const handleSignOut = async () => {
+        try {
+            await authClient.signOut({
+                fetchOptions: {
+                    onSuccess: () => {
+                        router.push("/login");
+                        router.refresh();
+                    },
+                },
+            });
+        } catch (error) {
+            toast("Failed to sign out");
+        }
+    };
+    return (
+        <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+                <button>
+                    <UserRound className="w-5 h-5" />
+                </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+                className="w-56"
+                align="start"
+            >
+                <DropdownMenuItem>
+                    <Link href="/admin/dashboard">Dashboard</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                    <Link href="/admin/orders">Manage Orders</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                    <Link href="/admin/menu">Manage Menu</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                    <Link href="/admin/users">Manage Users</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleSignOut}>
+                    Sign Out
+                </DropdownMenuItem>
+            </DropdownMenuContent>
+        </DropdownMenu>
+    )
+}
